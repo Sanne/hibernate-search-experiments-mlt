@@ -3,10 +3,12 @@ package org.hibernate.example.driver;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import org.apache.lucene.search.Query;
 import org.hibernate.example.model.Case;
-import org.hibernate.example.utils.BetterEntityManager;
-import org.hibernate.example.utils.BetterEntityManagerFactory;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.jpa.Search;
@@ -32,11 +34,19 @@ public class MLT {
 	 * -Xmx4G -Xms4G -XX:MaxPermSize=128M -XX:+HeapDumpOnOutOfMemoryError -Xss512k -XX:HeapDumpPath=/tmp/java_heap -Djava.net.preferIPv4Stack=true -Djgroups.bind_addr=127.0.0.1 -XX:+UseLargePages -XX:LargePageSizeInBytes=2m -Dlog4j.configuration=file:/opt/log4j.xml -XX:+UnlockCommercialFeatures -XX:+FlightRecorder -da -XX:+AggressiveOpts
 	 */
 	public static void main(String[] args) throws InterruptedException {
-		MLT driver = new MLT();
-		try ( BetterEntityManagerFactory entityManagerFactory = new BetterEntityManagerFactory() ) {
-			try ( BetterEntityManager em = entityManagerFactory.createEntityManager() ) {
-				driver.stressMLT( Search.getFullTextEntityManager( em ) );
+		final MLT driver = new MLT();
+		final EntityManagerFactory factory = Persistence.createEntityManagerFactory( "support" );
+		try {
+			final EntityManager entityManager = factory.createEntityManager();
+			try {
+				driver.stressMLT( Search.getFullTextEntityManager( entityManager ) );
 			}
+			finally {
+				entityManager.close();
+			}
+		}
+		finally {
+			factory.close();
 		}
 	}
 
