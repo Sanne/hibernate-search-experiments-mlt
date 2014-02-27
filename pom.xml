@@ -39,8 +39,8 @@
     </developers>
 
     <properties>
-        <infinispanVersion>7.0.0-SNAPSHOT</infinispanVersion>
-        <hibernateVersion>4.3.2-SNAPSHOT</hibernateVersion>
+        <infinispanVersion>6.0.1.Final</infinispanVersion>
+        <hibernateVersion>4.3.1.Final</hibernateVersion>
         <hibernateSearchVersion>5.0.0-SNAPSHOT</hibernateSearchVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
