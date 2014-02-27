@@ -4,8 +4,22 @@ import java.io.Serializable;
 import java.lang.String;
 import java.util.Date;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
 
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
+import org.apache.lucene.analysis.pattern.PatternTokenizerFactory;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.AnalyzerDef;
+import org.hibernate.search.annotations.AnalyzerDefs;
+import org.hibernate.search.annotations.Index;
+import org.hibernate.search.annotations.Parameter;
+import org.hibernate.search.annotations.TokenizerDef;
+import org.hibernate.search.annotations.TokenFilterDef;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Store;
@@ -14,6 +28,16 @@ import org.hibernate.search.annotations.TermVector;
 @Entity
 @Table(name="cases")
 @Indexed(index="cases")
+@AnalyzerDefs({ @AnalyzerDef(name="tags",
+	tokenizer = @TokenizerDef(factory = PatternTokenizerFactory.class,
+		params = {
+			@Parameter(name = "pattern", value = "#?([^#]+)#"),
+			@Parameter( name = "group", value = "1") } ),
+	filters = {
+		@TokenFilterDef(factory = ASCIIFoldingFilterFactory.class),
+		@TokenFilterDef(factory = LowerCaseFilterFactory.class)
+	})
+})
 public class Case implements Serializable {
 
 	private String casenumber;
@@ -116,7 +140,8 @@ public class Case implements Serializable {
 		this.case_language = case_language;
 	}
 
-	@Field(termVector=TermVector.YES)
+	@Field(termVector=TermVector.YES, index = Index.YES, name = "tags")
+	@Analyzer(definition="tags")
 	@Column(columnDefinition="text")
 	public String getTags() {
 		return this.tags;
