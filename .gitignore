@@ -1,6 +1,33 @@
-*.class
+# Typically *NIX text editors, by default, append '~' to files on saving to make backups
+*~
 
-# Package Files #
-*.jar
-*.war
-*.ear
+#Checkstyle
+.checkstyle
+
+# Build output directories
+target
+bin
+
+# IntelliJ specific files/directories
+/out
+.idea
+*.ipr
+*.iws
+*.iml
+atlassian-ide-plugin.xml
+
+# Eclipse specific files/directories
+.classpath
+.project
+.settings
+.externalToolBuilders
+.factorypath
+
+# NetBeans specific files/directories
+.nbattrs
+
+# Miscellaneous
+*.log
+*.sh
+.clover
+
