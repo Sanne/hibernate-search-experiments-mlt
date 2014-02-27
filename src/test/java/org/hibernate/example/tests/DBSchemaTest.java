@@ -1,3 +1,5 @@
+package org.hibernate.example.tests;
+
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
