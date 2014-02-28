@@ -31,7 +31,7 @@ public class Reindexer {
 
 	private static void rebuildIndexes(EntityManager entityManager) throws InterruptedException {
 		FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager( entityManager );
-		MassIndexerProgressMonitor monitor = new SimpleIndexingProgressMonitor( 500 );
+		MassIndexerProgressMonitor monitor = new SimpleIndexingProgressMonitor( 1000 );
 		fullTextEntityManager.createIndexer( Case.class )
 			.progressMonitor( monitor )
 			.batchSizeToLoadObjects( 15 )
