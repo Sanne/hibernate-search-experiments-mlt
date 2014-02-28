@@ -13,11 +13,14 @@ import javax.persistence.Transient;
 
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
+import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
 import org.apache.lucene.analysis.pattern.PatternTokenizerFactory;
+import org.apache.lucene.analysis.miscellaneous.KeywordMarkerFilterFactory;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Analyzer;
 import org.hibernate.search.annotations.AnalyzerDef;
 import org.hibernate.search.annotations.AnalyzerDefs;
+import org.hibernate.search.annotations.AnalyzerDiscriminator;
 import org.hibernate.search.annotations.Boost;
 import org.hibernate.search.annotations.Index;
 import org.hibernate.search.annotations.Norms;
@@ -32,14 +35,40 @@ import org.hibernate.search.annotations.TermVector;
 @Entity
 @Table(name="cases")
 @Indexed(index="cases")
-@AnalyzerDefs({ @AnalyzerDef(name="tags",
-	tokenizer = @TokenizerDef(factory = PatternTokenizerFactory.class,
-		params = {
-			@Parameter(name = "pattern", value = "#?([^#]+)#"),
-			@Parameter( name = "group", value = "1") } ),
+@AnalyzerDefs({
+	@AnalyzerDef(name="tags",
+			tokenizer = @TokenizerDef(factory = PatternTokenizerFactory.class,
+			params = {
+				@Parameter(name = "pattern", value = "#?([^#]+)#"),
+				@Parameter(name = "group", value = "1") } ),
+			filters = {
+			@TokenFilterDef(factory = ASCIIFoldingFilterFactory.class),
+			@TokenFilterDef(factory = LowerCaseFilterFactory.class)
+	}),
+	@AnalyzerDef(name = "en",
+		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+			filters = {
+				@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+				@TokenFilterDef(factory = KeywordMarkerFilterFactory.class,
+					params = { @Parameter(name="protected", value="techkeywords.txt") }),
+				@TokenFilterDef(factory = org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory.class
+			)
+		}),
+	@AnalyzerDef(name = "de",
+		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+		filters = {
+			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+			@TokenFilterDef(factory = KeywordMarkerFilterFactory.class,
+			params = { @Parameter(name="protected", value="techkeywords.txt") }),
+			@TokenFilterDef(factory = org.apache.lucene.analysis.de.GermanStemFilterFactory.class)
+		}),
+	@AnalyzerDef(name = "neutral",
+	tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
 	filters = {
-		@TokenFilterDef(factory = ASCIIFoldingFilterFactory.class),
-		@TokenFilterDef(factory = LowerCaseFilterFactory.class)
+		@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+		@TokenFilterDef(factory = KeywordMarkerFilterFactory.class,
+		params = { @Parameter(name="protected", value="techkeywords.txt") }),
+		@TokenFilterDef(factory = org.apache.lucene.analysis.en.EnglishPossessiveFilterFactory.class)
 	})
 })
 public class Case implements Serializable {
@@ -109,7 +138,7 @@ public class Case implements Serializable {
 	public String getVersionProduct() {
 		//Build a single identifying term for the Version of the product: we need to include the product to not match
 		//the same version of different products
-		return getProduct() + getVersion();
+		return getProduct() + " " + getVersion();
 	}
 
 	public Date getCreateddate() {
@@ -140,6 +169,7 @@ public class Case implements Serializable {
 	}
 
 	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(0.7f))
+	@AnalyzerDiscriminator(impl = LanguageDiscriminator.class)
 	public String getCase_language() {
 		return this.case_language;
 	}

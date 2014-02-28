@@ -25,7 +25,7 @@ public class MLT {
 
 	private static final boolean STRESS = false;
 
-	private static final boolean EXPLAIN_SCORE = false;
+	private static final boolean EXPLAIN_SCORE = true;//!STRESS;
 
 	int queriesDone = 0;
 	long startNanos = 0;
