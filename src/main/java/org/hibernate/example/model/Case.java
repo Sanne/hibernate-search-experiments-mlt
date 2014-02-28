@@ -90,7 +90,6 @@ public class Case implements Serializable {
 	private String product;
 	private String version;
 	private Date createddate;
-//	private Date closeddate;
 	private String severity;
 	private String case_language;
 	private String tags;
@@ -108,33 +107,25 @@ public class Case implements Serializable {
 	@Lob
 	@Fields({
 		@Field(termVector=TermVector.WITH_POSITION_OFFSETS, store=Store.YES, norms=Norms.YES, boost=@Boost(1.3f)),
-		@Field(name="ngrams_subject",termVector=TermVector.WITH_POSITION_OFFSETS, norms=Norms.NO)
+		@Field(name="ngrams_subject",termVector=TermVector.WITH_POSITION_OFFSETS, norms=Norms.NO, boost=@Boost(1.1f))
 	})
 	public String getSubject() { return this.subject; }
 	public void setSubject(String subject) { this.subject = subject; }
 
 	@Lob
 	@Fields({
-		@Field(termVector=TermVector.WITH_POSITION_OFFSETS, store=Store.NO, norms=Norms.YES, boost=@Boost(1.3f)),
-		@Field(name="ngrams_description",termVector=TermVector.WITH_POSITION_OFFSETS, norms=Norms.NO)
+		@Field(termVector=TermVector.WITH_POSITION_OFFSETS, store=Store.NO, norms=Norms.YES, boost=@Boost(1.1f)),
+		@Field(name="ngrams_description",termVector=TermVector.WITH_POSITION_OFFSETS, norms=Norms.NO, boost=@Boost(0.9f))
 	})
 	public String getDescription() { return this.description; }
 	public void setDescription(String description) { this.description = description; }
 
-	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(1.2f))
+	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(1.3f))
 	public String getProduct() { return this.product; }
 	public void setProduct(String product) { this.product = product; }
 
 	public String getVersion() { return this.version; }
 	public void setVersion(String version) { this.version = version; }
-
-	@Field(name="product_versioned", termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(0.9f))
-	@Transient//Not a database field
-	public String getVersionProduct() {
-		//Build a single identifying term for the Version of the product: we need to include the product to not match
-		//the same version of different products
-		return getProduct() + " " + getVersion();
-	}
 
 	public Date getCreateddate() { return this.createddate; }
 	public void setCreateddate(Date createddate) { this.createddate = createddate; }
@@ -157,5 +148,13 @@ public class Case implements Serializable {
 	@Column(columnDefinition="text")
 	public String getSbr_groups() { return this.sbr_groups; }
 	public void setSbr_groups(String sbr_groups) { this.sbr_groups = sbr_groups; }
+
+	@Field(name="product_versioned", termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO)
+	@Transient//Not a database field
+	public String getVersionProduct() {
+		//Build a single identifying term for the Version of the product: we need to include the product to not match
+		//the same version of different products
+		return getProduct() + " " + getVersion();
+	}
 
 }
