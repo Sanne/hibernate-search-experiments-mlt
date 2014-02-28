@@ -65,7 +65,8 @@ public class MLT {
 	private void playWithMLT(FullTextEntityManager fullTextEntityManager) {
 		QueryBuilder queryBuilder = fullTextEntityManager.getSearchFactory().buildQueryBuilder().forEntity( Case.class ).get();
 
-		Query query = queryBuilder.moreLikeThis().favorSignificantTermsWithFactor( 1.0f ).comparingAllFields().toEntityWithId( MODEL_CASE_ID ).createQuery();
+		Query query = queryBuilder.moreLikeThis()
+				.comparingAllFields().toEntityWithId( MODEL_CASE_ID ).createQuery();
 
 		if ( ! STRESS ) {
 			System.out.println( "Executing now: " + query.toString() );
