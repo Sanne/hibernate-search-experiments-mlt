@@ -17,6 +17,9 @@ public class LanguageDiscriminator implements Discriminator {
 		if ( "tags".equals( fieldName ) ) {
 			return "tags";
 		}
+		if ( fieldName.startsWith( "ngrams" ) ) {
+			return "ngrams";
+		}
 		final String languageCode = (String) value;
 		if ( "en".equals( languageCode ) ) {
 			return "en";

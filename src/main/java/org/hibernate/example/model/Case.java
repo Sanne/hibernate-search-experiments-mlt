@@ -16,12 +16,14 @@ import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
 import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
 import org.apache.lucene.analysis.pattern.PatternTokenizerFactory;
 import org.apache.lucene.analysis.miscellaneous.KeywordMarkerFilterFactory;
+import org.apache.lucene.analysis.ngram.NGramTokenizerFactory;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Analyzer;
 import org.hibernate.search.annotations.AnalyzerDef;
 import org.hibernate.search.annotations.AnalyzerDefs;
 import org.hibernate.search.annotations.AnalyzerDiscriminator;
 import org.hibernate.search.annotations.Boost;
+import org.hibernate.search.annotations.Fields;
 import org.hibernate.search.annotations.Index;
 import org.hibernate.search.annotations.Norms;
 import org.hibernate.search.annotations.Parameter;
@@ -69,7 +71,16 @@ import org.hibernate.search.annotations.TermVector;
 		@TokenFilterDef(factory = KeywordMarkerFilterFactory.class,
 		params = { @Parameter(name="protected", value="techkeywords.txt") }),
 		@TokenFilterDef(factory = org.apache.lucene.analysis.en.EnglishPossessiveFilterFactory.class)
-	})
+	}),
+	@AnalyzerDef(name = "ngrams",
+		tokenizer = @TokenizerDef(factory = NGramTokenizerFactory.class,
+		params = {
+			@Parameter(name="minGramSize", value="3"),
+			@Parameter(name="maxGramSize", value="4") }
+		),
+		filters = {
+			@TokenFilterDef(factory = LowerCaseFilterFactory.class)
+		})
 })
 public class Case implements Serializable {
 
@@ -91,47 +102,31 @@ public class Case implements Serializable {
 	}
 
 	@Id
-	public String getCasenumber() {
-		return this.casenumber;
-	}
+	public String getCasenumber() { return this.casenumber; }
+	public void setCasenumber(String casenumber) { this.casenumber = casenumber; }
 
-	public void setCasenumber(String casenumber) {
-		this.casenumber = casenumber;
-	}
+	@Lob
+	@Fields({
+		@Field(termVector=TermVector.WITH_POSITION_OFFSETS, store=Store.YES, norms=Norms.YES, boost=@Boost(1.3f)),
+		@Field(name="ngrams_subject",termVector=TermVector.WITH_POSITION_OFFSETS, norms=Norms.NO)
+	})
+	public String getSubject() { return this.subject; }
+	public void setSubject(String subject) { this.subject = subject; }
 
-	@Lob @Field(termVector=TermVector.YES, store=Store.YES)
-	public String getSubject() {
-		return this.subject;
-	}
-
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
-
-	@Lob @Field(termVector=TermVector.YES)
-	public String getDescription() {
-		return this.description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
+	@Lob
+	@Fields({
+		@Field(termVector=TermVector.WITH_POSITION_OFFSETS, store=Store.NO, norms=Norms.YES, boost=@Boost(1.3f)),
+		@Field(name="ngrams_description",termVector=TermVector.WITH_POSITION_OFFSETS, norms=Norms.NO)
+	})
+	public String getDescription() { return this.description; }
+	public void setDescription(String description) { this.description = description; }
 
 	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(1.2f))
-	public String getProduct() {
-		return this.product;
-	}
+	public String getProduct() { return this.product; }
+	public void setProduct(String product) { this.product = product; }
 
-	public void setProduct(String product) {
-		this.product = product;
-	}
-
-	public String getVersion() {
-		return this.version;
-	}
-	public void setVersion(String version) {
-		this.version = version;
-	}
+	public String getVersion() { return this.version; }
+	public void setVersion(String version) { this.version = version; }
 
 	@Field(name="product_versioned", termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(0.9f))
 	@Transient//Not a database field
@@ -141,62 +136,26 @@ public class Case implements Serializable {
 		return getProduct() + " " + getVersion();
 	}
 
-	public Date getCreateddate() {
-		return this.createddate;
-	}
+	public Date getCreateddate() { return this.createddate; }
+	public void setCreateddate(Date createddate) { this.createddate = createddate; }
 
-	public void setCreateddate(Date createddate) {
-		this.createddate = createddate;
-	}
+	public String getSeverity() { return this.severity; }
+	public void setSeverity(String severity) { this.severity = severity; }
 
-	/* Ignored for now as there's some problem in fetching this column -> didn't investigate yet
-	@Field
-	public Date getCloseddate() {
-		return this.closeddate;
-	}
-
-	public void setCloseddate(Date closeddate) {
-		this.closeddate = closeddate;
-	}
-	*/
-
-	public String getSeverity() {
-		return this.severity;
-	}
-
-	public void setSeverity(String severity) {
-		this.severity = severity;
-	}
-
-	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(0.7f))
+	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(0.5f))
 	@AnalyzerDiscriminator(impl = LanguageDiscriminator.class)
-	public String getCase_language() {
-		return this.case_language;
-	}
-
-	public void setCase_language(String case_language) {
-		this.case_language = case_language;
-	}
+	public String getCase_language() { return this.case_language; }
+	public void setCase_language(String case_language) { this.case_language = case_language; }
 
 	@Field(termVector=TermVector.YES, index = Index.YES, name = "tags")
 	@Analyzer(definition="tags")
 	@Column(columnDefinition="text")
-	public String getTags() {
-		return this.tags;
-	}
-
-	public void setTags(String tags) {
-		this.tags = tags;
-	}
+	public String getTags() { return this.tags; }
+	public void setTags(String tags) { this.tags = tags; }
 
 	@Field(termVector=TermVector.YES)
 	@Column(columnDefinition="text")
-	public String getSbr_groups() {
-		return this.sbr_groups;
-	}
-
-	public void setSbr_groups(String sbr_groups) {
-		this.sbr_groups = sbr_groups;
-	}
+	public String getSbr_groups() { return this.sbr_groups; }
+	public void setSbr_groups(String sbr_groups) { this.sbr_groups = sbr_groups; }
 
 }
