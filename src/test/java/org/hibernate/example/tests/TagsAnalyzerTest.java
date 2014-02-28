@@ -40,6 +40,7 @@ public class TagsAnalyzerTest {
 			Assert.assertEquals( 2, indexReader.docFreq( new Term( "tags", "infinispan" ) ) );
 			Assert.assertEquals( 2, indexReader.docFreq( new Term( "tags", "rhel 7" ) ) );
 			Assert.assertEquals( 2, indexReader.docFreq( new Term( "tags", "jon" ) ) );
+			Assert.assertEquals( 9, indexReader.docFreq( new Term( "case_language", "EN" ) ) );
 		}
 	}
 
