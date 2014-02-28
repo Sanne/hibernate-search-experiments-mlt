@@ -13,10 +13,13 @@ import javax.persistence.Table;
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
 import org.apache.lucene.analysis.pattern.PatternTokenizerFactory;
+import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Analyzer;
 import org.hibernate.search.annotations.AnalyzerDef;
 import org.hibernate.search.annotations.AnalyzerDefs;
+import org.hibernate.search.annotations.Boost;
 import org.hibernate.search.annotations.Index;
+import org.hibernate.search.annotations.Norms;
 import org.hibernate.search.annotations.Parameter;
 import org.hibernate.search.annotations.TokenizerDef;
 import org.hibernate.search.annotations.TokenFilterDef;
@@ -84,7 +87,7 @@ public class Case implements Serializable {
 		this.description = description;
 	}
 
-	@Field(termVector=TermVector.YES)
+	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(1.2f))
 	public String getProduct() {
 		return this.product;
 	}
@@ -93,7 +96,7 @@ public class Case implements Serializable {
 		this.product = product;
 	}
 
-	@Field(termVector=TermVector.YES)
+	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(0.7f))
 	public String getVersion() {
 		return this.version;
 	}
@@ -102,7 +105,6 @@ public class Case implements Serializable {
 		this.version = version;
 	}
 
-	@Field(termVector=TermVector.YES)
 	public Date getCreateddate() {
 		return this.createddate;
 	}
@@ -122,7 +124,6 @@ public class Case implements Serializable {
 	}
 	*/
 
-	@Field(termVector=TermVector.YES)
 	public String getSeverity() {
 		return this.severity;
 	}
@@ -131,7 +132,7 @@ public class Case implements Serializable {
 		this.severity = severity;
 	}
 
-	@Field(termVector=TermVector.YES)
+	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(0.7f))
 	public String getCase_language() {
 		return this.case_language;
 	}
