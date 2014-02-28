@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
@@ -96,13 +97,19 @@ public class Case implements Serializable {
 		this.product = product;
 	}
 
-	@Field(termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(0.7f))
 	public String getVersion() {
 		return this.version;
 	}
-
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	@Field(name="product_versioned", termVector=TermVector.YES, norms=Norms.NO, analyze=Analyze.NO, boost=@Boost(0.9f))
+	@Transient//Not a database field
+	public String getVersionProduct() {
+		//Build a single identifying term for the Version of the product: we need to include the product to not match
+		//the same version of different products
+		return getProduct() + getVersion();
 	}
 
 	public Date getCreateddate() {
